@@ -13,9 +13,7 @@ const POKEMONS_URL = `${BASE_URL}/pokemons`
   </ul>
 </div> */
 
-
-
-
+let main = document.querySelector('main')
 
 fetch('http://localhost:3000/trainers')
     .then(function(response){
@@ -24,7 +22,7 @@ fetch('http://localhost:3000/trainers')
     .then(function(obj) {
         obj.forEach(trainer=>{
             let divTag = document.createElement('div')
-            document.body.append(divTag)
+            main.append(divTag)
 
             divTag.setAttribute('class', 'card')
             divTag.setAttribute('data-id', trainer.id)
@@ -40,23 +38,7 @@ fetch('http://localhost:3000/trainers')
 
             // let trainerId = document.querySelector('div')
             // console.log(trainer.id)
-            btn.addEventListener('click', function(){
-                fetch('http://localhost:3000/pokemons', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        trainer_id: trainer.id
-                    })
-                })
-                .then(function(response){
-                    return response.json()
-                })
-                .then(function(obj){
-                    console.log(obj)
-                })
-            })
+            
 
             let ulTag = document.createElement('ul')
             divTag.append(ulTag)
@@ -67,16 +49,49 @@ fetch('http://localhost:3000/trainers')
                 })
                 .then(function(obj){
                     obj.forEach(pokemon=>{
-                        let liTag = document.createElement('li')
-                        liTag.innerHTML = pokemon.nickname
-                        ulTag.append(liTag)
-
-                        let liBtn = document.createElement('button')
-                        liBtn.innerHTML = "Release"
-                        liBtn.setAttribute('class', 'release')
-                        liBtn.setAttribute('data-pokemon-id', pokemon.id)
-                        liTag.append(liBtn)
+                        addPokemon(pokemon, ulTag)
                     })
                 })
+            
+            btn.addEventListener('click', function(){
+                let liCount = divTag.querySelectorAll('li')
+                if (liCount.length < 6) {
+                    fetch('http://localhost:3000/pokemons', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            trainer_id: trainer.id
+                        })
+                    })
+                    .then(function(response){
+                        return response.json()
+                    })
+                    .then(function(obj){
+                        addPokemon(obj, ulTag)
+                    })
+                }
+            })
         })
     })
+
+    function addPokemon(pokemon, ulTag) {
+        let liTag = document.createElement('li')
+        liTag.innerHTML = pokemon.nickname
+        ulTag.append(liTag)
+
+        let liBtn = document.createElement('button')
+        liBtn.innerHTML = "Release"
+        liBtn.setAttribute('class', 'release')
+        liBtn.setAttribute('data-pokemon-id', pokemon.id)
+        liTag.append(liBtn)
+
+        liBtn.addEventListener('click', function(){
+            fetch(`http://localhost:3000/pokemons/${pokemon.id}`, {
+                method: 'DELETE'
+            })
+            liBtn.remove()
+            liTag.remove()
+        })
+    }

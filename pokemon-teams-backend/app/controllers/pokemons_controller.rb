@@ -13,12 +13,8 @@ class PokemonsController < ApplicationController
     end
 
     def destroy
-        pokemons = Pokemon.all
-
         pokemon = Pokemon.find_by(id: params[:id])
         pokemon.destroy
-
-        render json: pokemons
     end
 
 end
